@@ -181,7 +181,7 @@ function draw() {
   //make obstacle trees
   if(frameTimer >= obstacleInterval) {
     for(var i = 0; i < randomObstacles; i++) {
-      obstacles.push(new Ground(treeImg, objectLimit, 75-(i*3), 90-(i*4), (height-150)+((i*12)/2), width+((i*40)+12)));
+      obstacles.push(new Ground(treeImg, objectLimit, 75-(i*3), 90-(i*4), (height-160)+((i*6)/2), width+((i*35)+6)));
     }
     frameCounter = 0;
     obstacleInterval = round(random(0.6, 1.4));
