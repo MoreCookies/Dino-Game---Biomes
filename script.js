@@ -26,6 +26,16 @@ var obstacles = []
 var frameCounter = 0;
 var score = 0;
 var randomObstacles = 0;
+var dinoRun = [
+  {'name':'walk01', 'frame':{'x':0, 'y': 0, 'width': 201, 'height': 202}},
+  {'name':'walk02', 'frame':{'x':200, 'y': 0, 'width': 201, 'height': 202}},
+  {'name':'walk03', 'frame':{'x':402, 'y': 1, 'width': 201, 'height': 202}},
+  {'name':'walk04', 'frame':{'x':0, 'y': 202, 'width': 201, 'height': 202}},
+  {'name':'walk05', 'frame':{'x':200, 'y': 203, 'width': 201, 'height': 202}},
+  {'name':'walk06', 'frame':{'x':400, 'y': 203, 'width': 201, 'height': 202}},
+]
+var dinoJump = "yes"
+let currentAnim = dinoRun;
 //welcome to grass class lass brass last fast mast pastor tasse waaste cast sus brrass bbbbbbbbbbbbbb
 class Ground {
 	constructor(img, limit, widthI, heightI, up, xx) {
@@ -67,50 +77,64 @@ class Ground {
 }
 
 class dino {
-  constructor(upArrow, downArrow, jumpHeight, obstaclesI, imgUp, imgDown, imgIdle, widthI, heightI, gravity) {
+  constructor(upArrow, downArrow, jumpHeight, imgDown, widthI, heightI, gravity, run, jump, fall) {
     this.upAr = upArrow;
     this.downAr = downArrow;
     this.jumpH = jumpHeight;
-    this.obstacle = obstaclesI;
     this.x = winWidth/2
     this.y = winHeight-150
-    this.speed = jumpHeight;
     this.currentImg = imgIdle;
     this.downSpeed = 0;
-    this.gravity = gravityl
-    this.currentAnim = 1;
+    this.gravity = gravity;
+    this.imgIdle = imgIdle;
+    this.widthI = widthI;
+    this.heightI = heightI;
+    this.alive = true;
+    this.mass = 4; //ah yes, my dinosaur weighs 4
+    this.acc = 0;
+    this.imgUp = imgUp;
+    this.imgDown = imgDown;
   }
 
   display() {
-    image(currentImg, x, y, widthI, heightI)
+    if(this.alive == true) {
+      Animation(currentImg, this.x, this.y, widthI, heightI)
+    }
   }
 
   handleKeypressed() {
-    if(keyCode == upArrow) {
+    if(keyCode == upArrow && downSpeed == 0) {
       this.currentImg = imgUp;
-      this.downSpeed = -10;
-      this.speed = jumpHeight;
+      this.downSpeed = -jumpHeight;
     } else if(keyCode == downArrow) {
       //crouching animation
     }
   }
 
-  update() {
-    this.downSpeed *= gravity/10;
-    this.y -= this.downSpeed;
-    if(this.y <= winHeight-150) {
-      this.downSpeed = 0;
-      this.y = winHeight-150;
-    }
+  forces() {
+    let e = this.gravity;
+    e /= this.mass;
+    this.acc += e;
+
   }
 
-  checkCollision() {
+  update() {
+    this.downSpeed += this.acc;
+    this.y += this.downSpeed;
+    this.acc = 0;
+  }
+
+  checkCollision(obstacles) {
     /*
     use this.x and this.y along with the fact that the positions of images are in the top left corner to check collisions have fun lmao fuuuuu
     */
-    for(var r = 0; r < obstacle.length; r++) {
-      
+    imageMode(CENTER);
+    for(var r = 0; r < obstacles.length; r++) {
+      if(this.x-(this.widthI/2) > obstacles[r].x && this.x < obstacles[r].widthI  && this.y > obstacles[r].up && this.y < obstacles[r].heightI) {
+        this.alive = false;
+      }
     }
+    imageMode(CORNER);
   }
 
 }
@@ -127,6 +151,7 @@ function preload() {
 	tentImg = loadImage("assets/biomeObjects/Deep Forest/tent.png");
 	rockImg = loadImage("assets/biomeObjects/Deep Forest/rock.png");
   fireImg = loadImage("assets/biomeObjects/Deep Forest/fire.png")
+  dinoRunAnim = loadAnimation("assets/dinosaur/dinosaur-spritesheet.png", dinoRun);
 }
 
 function setup() {
@@ -136,6 +161,7 @@ function setup() {
   frameRate(fr);
   var obstacleInterval = round(random(0.6, 1.4));
   randomObstacles = round(random(1, 3))
+  //let player = new dino(UP_ARROW, DOWN_ARROW, 4, )
 }
 
 function draw() {
@@ -159,15 +185,15 @@ function draw() {
   if(randomObject <= 1.001) {
     //tent
     grounds.push(new Ground(tentImg, objectLimit, 65, 65, height-135))
-  } else if(randomObject <= 1.3) {
+  } else if(randomObject <= 1.1) {
     //rock
-    grounds.push(new Ground(rockImg, objectLimit, 30, 35, height-105))
-  } else if(randomObject <= 2.95) {
+    grounds.push(new Ground(rockImg, objectLimit, 25, 24, height-95))
+  } else if(randomObject <= 2.97) {
     //grass
-    grounds.push(new Ground(grassImg, objectLimit, 15, 30, (height-93)))
+    grounds.push(new Ground(grassImg, objectLimit, 15, 30, (height-90)))
   } else if(randomObject <= 3) {
     //fire
-    grounds.push(new Ground(fireImg, objectLimit, 35, 40, height-115))
+    grounds.push(new Ground(fireImg, objectLimit, 35, 40, height-112))
   }
 	//update and delete the objects
 	for (var k = 0; k < grounds.length; k++) {
